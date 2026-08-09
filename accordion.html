@@ -10,8 +10,6 @@
 <meta property="og:title" content="Партнёры Академии BMW — проверенные техцентры и тюнинг-ателье">
 <meta property="og:description" content="Карта проверенных сервисов BMW в Москве и области. Найдите ближайший техцентр или станьте партнёром Академии.">
 <meta property="og:url" content="https://germsp.ru/partners">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -61,12 +59,12 @@
 [data-theme="dark"] {
   --bg: #2B2C2E; --bg-soft: #1C1C1C; --card: #202122; --border: #4D4D4D;
   --text: #FFFFFF; --text-2: #CACACE; --text-3: #999999;
-  --accent: #FFEA00; --accent-text: #1C1C1C;
+  --accent: #FFEA00; --accent-text: #1C1C1C; --map-filter: grayscale(0.5) brightness(0.8);
 }
 [data-theme="light"] {
   --bg: #FAFAFA; --bg-soft: #FFFFFF; --card: #FFFFFF; --border: #E5E5E6;
   --text: #1C1C1C; --text-2: #4D4D4D; --text-3: #999999;
-  --accent: #FFEA00; --accent-text: #1C1C1C;
+  --accent: #FFEA00; --accent-text: #1C1C1C; --map-filter: none;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { overflow-x: clip; }
@@ -77,11 +75,13 @@ body {
 }
 a { color: inherit; }
 img { max-width: 100%; }
-h1, h2, h3, .btn, .partner-name, .chip, .phone { font-family: 'Oswald', 'Arial Narrow', sans-serif; }
+h1, h2, h3, .btn, .logo, .partner-name, .chip, .step-num {
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+}
 .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
 /* ===== Шапка ===== */
-.header { position: sticky; top: 0; z-index: 60; background: var(--bg-soft); border-bottom: 1px solid var(--border); }
+.header { position: sticky; top: 0; z-index: 50; background: var(--bg-soft); border-bottom: 1px solid var(--border); }
 .header-inner { display: flex; align-items: center; gap: 24px; height: 64px; }
 .logo { display: flex; align-items: center; text-decoration: none; }
 .logo-img { display: flex; padding: 6px 10px; border-radius: 6px; }
@@ -90,8 +90,9 @@ h1, h2, h3, .btn, .partner-name, .chip, .phone { font-family: 'Oswald', 'Arial N
 .nav { display: flex; gap: 20px; margin-left: 12px; }
 .nav a { text-decoration: none; color: var(--text-2); font-size: 14px; white-space: nowrap; }
 .nav a:hover, .nav a.active { color: var(--text); }
+.nav a.active { font-weight: 500; }
 .header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
-.phone { font-weight: 500; font-size: 16px; letter-spacing: 0.5px; text-decoration: none; white-space: nowrap; }
+.phone { font-family: 'Oswald', sans-serif; font-weight: 500; font-size: 16px; letter-spacing: 0.5px; text-decoration: none; white-space: nowrap; }
 .theme-toggle {
   width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border);
   background: var(--card); color: var(--text); cursor: pointer; font-size: 18px;
@@ -101,173 +102,120 @@ h1, h2, h3, .btn, .partner-name, .chip, .phone { font-family: 'Oswald', 'Arial N
 @media (max-width: 900px) { .nav { display: none; } }
 @media (max-width: 480px) { .phone { display: none; } }
 
-/* ===== Плашка макета (на проде удалить) ===== */
+/* ===== Плашка «что исправлено» (только для макета) ===== */
 .mock-note { background: #fff8d6; border-bottom: 1px solid #eadf9e; color: #4a3f00; font-size: 14px; }
 .mock-note details { max-width: 1200px; margin: 0 auto; padding: 10px 20px; }
 .mock-note summary { cursor: pointer; font-weight: 600; }
 .mock-note ul { margin: 10px 0 4px 20px; }
 .mock-note li { margin-bottom: 4px; }
-.mock-note a { color: inherit; }
 
 /* ===== Hero ===== */
-.hero { padding: 40px 0 28px; }
-.breadcrumbs { font-size: 13px; color: var(--text-3); margin-bottom: 14px; }
+.hero { padding: 56px 0 40px; }
+.breadcrumbs { font-size: 13px; color: var(--text-3); margin-bottom: 18px; }
 .breadcrumbs a { color: var(--text-3); text-decoration: none; }
-h1 { font-size: clamp(26px, 4vw, 44px); line-height: 1.1; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-.hero p { margin-top: 12px; font-size: 15px; color: var(--text-2); max-width: 62ch; }
-.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+.breadcrumbs a:hover { color: var(--text); }
+h1 {
+  font-size: clamp(28px, 4.5vw, 52px); line-height: 1.1; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px; max-width: 24ch;
+}
+.hero p { margin-top: 16px; font-size: 16px; color: var(--text-2); max-width: 62ch; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+
+/* Кнопки как на сайте: белая основная, контурная вторичная, жёлтая акцентная */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 15px 38px; border-radius: 22px;
-  font-family: 'Roboto', sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 1px;
-  text-transform: uppercase; text-decoration: none; border: none; cursor: pointer;
-  transition: filter .15s, transform .12s;
+  padding: 17px 42px; border-radius: 22px;
+  font-family: 'Roboto', sans-serif; font-size: 19px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: none; border: none; cursor: pointer; transition: filter .15s, transform .12s;
 }
 .btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
 .btn-light { background: #FFFFFF; color: #1C1C1C; }
+.btn-accent { background: var(--accent); color: var(--accent-text); }
 .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
 .btn-outline:hover { border-color: var(--text); }
 
-/* ===== Панель инструментов (sticky) ===== */
-.toolbar {
-  position: sticky; top: 64px; z-index: 55;
-  background: var(--bg); border-bottom: 1px solid var(--border); padding: 12px 0;
-}
-.toolbar-inner { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+/* ===== Фильтры ===== */
+.filters { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .search-input {
-  flex: 1 1 200px; min-width: 0; padding: 12px 16px; border-radius: var(--radius);
+  flex: 1 1 220px; min-width: 0; padding: 13px 16px; border-radius: var(--radius);
   border: 1px solid var(--border); background: var(--card); color: var(--text);
   font-family: 'Roboto', sans-serif; font-size: 15px;
 }
 .search-input::placeholder { color: var(--text-3); }
 .search-input:focus { outline: none; border-color: var(--accent); }
 .chip {
-  padding: 9px 16px; border-radius: var(--radius); border: 1px solid var(--border);
-  background: var(--card); color: var(--text-2); font-size: 13px; font-weight: 500;
+  padding: 10px 18px; border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--card); color: var(--text-2); font-size: 14px; font-weight: 500;
   letter-spacing: 0.5px; cursor: pointer; white-space: nowrap; text-transform: uppercase;
 }
 .chip:hover { border-color: var(--accent); color: var(--text); }
 .chip.active { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
-.geo-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 10px 16px; border-radius: var(--radius); border: 1px solid var(--border);
-  background: var(--card); color: var(--text); font-size: 14px; font-weight: 500;
-  cursor: pointer; white-space: nowrap; font-family: 'Roboto', sans-serif;
-}
-.geo-btn:hover { border-color: var(--accent); }
-.geo-btn.active { border-color: var(--accent); background: rgba(255,234,0,.12); }
 
-/* ===== Локатор: сплит-вью ===== */
-.locator {
-  display: grid; grid-template-columns: 420px 1fr;
-  height: calc(100vh - 64px - 61px); min-height: 480px;
-  border-bottom: 1px solid var(--border); position: relative;
-}
-.pane-list { overflow-y: auto; background: var(--bg); }
-.list-meta { padding: 14px 16px 6px; font-size: 14px; color: var(--text-3); }
-.list-meta b { color: var(--text); font-weight: 500; }
-.reset-link { background: none; border: none; color: var(--text-2); font-size: 14px; cursor: pointer; border-bottom: 1px dashed var(--text-3); padding: 0; margin-left: 10px; }
-.reset-link:hover { color: var(--text); border-color: var(--accent); }
-.partner-list { display: flex; flex-direction: column; gap: 10px; padding: 8px 16px 16px; }
+/* ===== Список + карта ===== */
+.map-section { padding: 28px 0 64px; }
+.map-grid { display: grid; grid-template-columns: 400px 1fr; gap: 24px; align-items: start; }
+.partner-list { display: flex; flex-direction: column; gap: 12px; max-height: 640px; overflow-y: auto; padding-right: 6px; }
 .partner-card {
   background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-  overflow: hidden; transition: border-color .15s; position: relative;
+  padding: 20px; transition: border-color .15s;
 }
 .partner-card:hover { border-color: var(--accent); }
-.partner-card.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.partner-summary {
-  width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px;
-  background: none; border: none; color: var(--text); cursor: pointer; text-align: left; font-family: inherit;
-}
-.partner-num {
-  flex: 0 0 26px; width: 26px; height: 26px; border-radius: 50%;
-  background: var(--accent); color: var(--accent-text);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 14px;
-}
+.partner-head { display: flex; align-items: center; gap: 14px; }
 .partner-logo {
-  width: 44px; height: 44px; flex: 0 0 44px; border-radius: var(--radius); background: var(--bg-soft);
+  width: 52px; height: 52px; flex: 0 0 52px; border-radius: var(--radius); background: var(--bg-soft);
   border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
-  font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 19px; color: var(--accent);
+  font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 22px; color: var(--accent);
 }
-img.partner-logo { object-fit: contain; padding: 4px; background: #FFFFFF; }
-.partner-oneline { flex: 1; min-width: 0; }
-.partner-name { display: block; font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-.partner-addr1 { display: block; font-size: 13px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.partner-status { display: block; font-size: 12px; margin-top: 2px; font-weight: 500; }
-.partner-status.open { color: #4ade80; }
-.partner-status.closed { color: #f87171; }
-.partner-dist {
-  flex: 0 0 auto; font-size: 13px; font-weight: 500; color: var(--text-2);
-  background: var(--bg-soft); border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px;
-}
-.chevron { flex: 0 0 auto; color: var(--text-3); transition: transform .2s; font-size: 12px; }
-.partner-card.open .chevron { transform: rotate(180deg); color: var(--accent); }
-.partner-details { display: none; padding: 0 14px 14px 14px; }
-.partner-card.open .partner-details { display: block; }
-.partner-address { font-size: 14px; color: var(--text-2); overflow-wrap: break-word; }
+.partner-name { font-size: 19px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.partner-district { font-size: 13px; color: var(--text-3); }
+.partner-address { margin-top: 10px; font-size: 14px; color: var(--text-2); overflow-wrap: break-word; }
 .partner-hours { margin-top: 6px; font-size: 13px; color: var(--text-3); }
 .partner-desc { margin-top: 8px; font-size: 13px; color: var(--text-2); }
-.partner-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: 14px; font-weight: 500; }
+img.partner-logo { object-fit: contain; padding: 4px; background: #FFFFFF; }
+.partner-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; font-size: 14px; font-weight: 500; }
 .partner-actions a { color: var(--text-2); text-decoration: none; border-bottom: 1px dashed var(--text-3); }
 .partner-actions a:hover { color: var(--text); border-color: var(--accent); }
-
-/* ===== Карта ===== */
-.pane-map { position: relative; min-width: 0; }
-#map { position: absolute; inset: 0; }
-.leaflet-container { background: var(--bg-soft); font-family: 'Roboto', sans-serif; }
-.pin {
-  width: 30px; height: 30px; border-radius: 50%;
-  background: var(--accent); color: #1C1C1C; border: 2px solid #1C1C1C;
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 14px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+.map-wrap {
+  position: sticky; top: 88px; border-radius: var(--radius); overflow: hidden;
+  border: 1px solid var(--border); background: var(--card);
 }
-.pin.active { background: #1C1C1C; color: var(--accent); border-color: var(--accent); transform: scale(1.25); }
-.user-dot { width: 16px; height: 16px; border-radius: 50%; background: #377AC8; border: 3px solid #fff; box-shadow: 0 0 0 4px rgba(55,122,200,.3); }
-
-/* ===== Мобильная шторка ===== */
-.sheet-handle { display: none; }
+.map-wrap iframe { display: block; width: 100%; height: 640px; border: 0; filter: var(--map-filter); }
+.empty-state { padding: 32px; text-align: center; color: var(--text-3); font-size: 14px; display: none; }
 @media (max-width: 900px) {
-  .locator { display: block; height: calc(100dvh - 64px - 57px); }
-  .pane-map { position: absolute; inset: 0; }
-  .pane-list {
-    position: absolute; z-index: 1010; left: 0; right: 0; bottom: 0;
-    background: var(--bg); border-top: 1px solid var(--border);
-    border-radius: 16px 16px 0 0; box-shadow: 0 -8px 30px rgba(0,0,0,.35);
-    height: 45%; transition: height .25s ease; overflow-y: auto;
-  }
-  .locator.sheet-peek .pane-list { height: 110px; }
-  .locator.sheet-full .pane-list { height: 92%; }
-  .sheet-handle {
-    display: block; width: 100%; padding: 10px 0 6px; background: none; border: none;
-    cursor: pointer; position: sticky; top: 0; z-index: 2;
-    background: var(--bg); border-radius: 16px 16px 0 0;
-  }
-  .sheet-handle::before {
-    content: ''; display: block; width: 44px; height: 5px; border-radius: 999px;
-    background: var(--border); margin: 0 auto;
-  }
-  .sheet-hint { text-align: center; font-size: 12px; color: var(--text-3); padding-bottom: 4px; }
+  .map-grid { grid-template-columns: 1fr; }
+  .map-wrap { position: static; order: 2; }
+  .map-wrap iframe { height: 380px; }
+  .partner-list { order: 1; max-height: none; overflow: visible; padding-right: 0; }
 }
-@media (min-width: 901px) { .sheet-hint { display: none; } }
 
-/* ===== Секции ===== */
+/* ===== Преимущества ===== */
 .section { padding: 64px 0; }
-.section h2 { font-size: clamp(24px, 3vw, 36px); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 36px; }
+.section h2 {
+  font-size: clamp(24px, 3vw, 36px); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.5px; margin-bottom: 36px;
+}
 .benefits { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-.benefit-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; display: flex; flex-direction: column; gap: 14px; }
-.benefit-icon { width: 48px; height: 48px; border-radius: var(--radius); background: var(--bg-soft); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.benefit-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 28px 24px; display: flex; flex-direction: column; gap: 14px;
+}
+.benefit-icon {
+  width: 48px; height: 48px; border-radius: var(--radius); background: var(--bg-soft);
+  border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 22px;
+}
 .benefit-card h3 { font-size: 18px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 .benefit-card p { font-size: 14px; color: var(--text-2); }
 @media (max-width: 900px) { .benefits { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 540px) { .benefits { grid-template-columns: 1fr; } }
+
+/* ===== Шаги ===== */
 .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 .step { position: relative; padding-top: 8px; }
 .step-num {
   width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--border);
   background: var(--card); display: flex; align-items: center; justify-content: center;
-  font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 18px; margin-bottom: 18px; position: relative; z-index: 1;
+  font-weight: 600; font-size: 18px; margin-bottom: 18px; position: relative; z-index: 1;
 }
 .step::after { content: ''; position: absolute; top: 31px; left: 58px; right: -10px; border-top: 2px dotted var(--border); }
 .step:last-child::after { display: none; }
@@ -279,29 +227,92 @@ img.partner-logo { object-fit: contain; padding: 4px; background: #FFFFFF; }
   .step { display: grid; grid-template-columns: 46px 1fr; column-gap: 18px; }
   .step-num { margin-bottom: 0; grid-row: span 2; }
 }
-.cta { border-radius: var(--radius); padding: 56px 40px; text-align: center; background: #1C1C1C; color: #FFFFFF; border: 1px solid #4D4D4D; }
+
+/* ===== CTA ===== */
+.cta {
+  border-radius: var(--radius); padding: 56px 40px; text-align: center;
+  background: #1C1C1C; color: #FFFFFF; border: 1px solid #4D4D4D;
+}
 .cta h2 { font-size: clamp(22px, 3vw, 32px); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
 .cta p { color: #CACACE; max-width: 55ch; margin: 0 auto 28px; font-size: 16px; }
 .cta .note { margin-top: 18px; font-size: 13px; color: #999999; }
+
+
+/* ===== UX-обновление: компактный список, аккордеон, вкладки ===== */
+.list-meta { margin: 0 0 14px; font-size: 14px; color: var(--text-3); }
+.list-meta b { color: var(--text); font-weight: 500; }
+.reset-link { background: none; border: none; color: var(--text-2); font-size: 14px; cursor: pointer; border-bottom: 1px dashed var(--text-3); padding: 0; margin-left: 10px; }
+.reset-link:hover { color: var(--text); border-color: var(--accent); }
+
+.partner-list { max-height: none; overflow: visible; padding-right: 0; }
+.partner-card { padding: 0; overflow: hidden; }
+.partner-summary {
+  width: 100%; display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+  background: none; border: none; color: var(--text); cursor: pointer; text-align: left;
+  font-family: inherit;
+}
+.partner-summary .partner-logo { width: 44px; height: 44px; flex-basis: 44px; font-size: 19px; }
+.partner-summary .partner-name { font-size: 17px; }
+.partner-oneline { flex: 1; min-width: 0; }
+.partner-oneline .partner-name { display: block; }
+.partner-oneline .partner-addr1 {
+  display: block; font-size: 13px; color: var(--text-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.chevron { flex: 0 0 auto; color: var(--text-3); transition: transform .2s; font-size: 12px; }
+.partner-card.open .chevron { transform: rotate(180deg); color: var(--accent); }
+.partner-card.open { border-color: var(--accent); }
+.partner-details { display: none; padding: 0 16px 16px 74px; }
+.partner-card.open .partner-details { display: block; }
+.partner-details .partner-address { margin-top: 0; }
+.show-on-map {
+  margin-top: 12px; display: inline-flex; align-items: center; gap: 6px;
+  background: none; border: 1px solid var(--border); border-radius: var(--radius);
+  color: var(--text-2); padding: 8px 14px; font-size: 13px; cursor: pointer; font-family: inherit;
+}
+.show-on-map:hover { border-color: var(--accent); color: var(--text); }
+@media (max-width: 480px) { .partner-details { padding-left: 16px; } }
+
+/* Вкладки Список/Карта — только мобильные */
+.view-tabs { display: none; }
+@media (max-width: 900px) {
+  .view-tabs {
+    display: flex; gap: 0; margin-bottom: 16px; position: sticky; top: 64px; z-index: 40;
+    background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; padding: 4px;
+  }
+  .view-tabs button {
+    flex: 1; padding: 11px; border: none; background: none; color: var(--text-2);
+    font-family: 'Oswald', sans-serif; font-size: 15px; font-weight: 500; letter-spacing: 1px;
+    text-transform: uppercase; cursor: pointer; border-radius: 5px;
+  }
+  .view-tabs button.active { background: var(--accent); color: var(--accent-text); }
+  .map-wrap { display: none; }
+  body[data-view="map"] .map-wrap { display: block; }
+  body[data-view="map"] .partner-list, body[data-view="map"] .list-meta { display: none; }
+  body[data-view="map"] .map-wrap iframe { height: 65vh; }
+}
+
+/* ===== Футер ===== */
 .footer { border-top: 1px solid var(--border); padding: 32px 0; color: var(--text-3); font-size: 13px; background: var(--bg-soft); }
 .footer-inner { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; }
 </style>
 </head>
 <body>
 
+<!-- Плашка для презентации макета — на проде удалить -->
 <div class="mock-note">
   <details>
     <summary>Это макет редизайна страницы /partners — что здесь исправлено</summary>
-    <p style="margin-top:8px">Вариант A — интерактивный локатор (эта страница). Также:
-      <a href="accordion.html"><b>вариант B — список-аккордеон</b></a> ·
-      <a href="map-first.html"><b>вариант C — карта во главе</b></a>.</p>
+    <p style="margin-top:8px">Вариант B — список-аккордеон (эта страница). Также: <a href="index.html" style="color:inherit;text-decoration:underline"><b>вариант A — интерактивный локатор</b></a> · <a href="map-first.html" style="color:inherit;text-decoration:underline"><b>вариант C — карта во главе</b></a>.</p>
     <ul>
-      <li>Интерактивная карта: клик по метке подсвечивает карточку, клик по карточке — метку; номера меток совпадают со списком (паттерн дилерских локаторов);</li>
-      <li>Сплит-вью на весь экран: список и карта видны одновременно, без лишнего скролла;</li>
-      <li>Мобильная шторка снизу (как в Яндекс.Картах и 2ГИС): карта видна всегда, список выдвигается;</li>
-      <li>Статус «Открыто до 21:00» / «Закрыто» из реальных часов работы;</li>
-      <li>Кнопка «Рядом со мной»: геолокация и сортировка по расстоянию;</li>
-      <li>SEO: уникальные title/description/canonical/OG, JSON-LD ItemList со всеми 33 партнёрами — сейчас страница отдаёт пустой HTML с мета главной.</li>
+      <li>Уникальные title, description, canonical, Open Graph и JSON-LD (ItemList партнёров) — сейчас страница отдаёт пустой HTML с мета главной;</li>
+      <li>Заголовок не капсом в разметке и не обрезается на мобильных;</li>
+      <li>Список партнёров с полными адресами, фильтрами и поиском — вместо обрезанных карточек;</li>
+      <li>На мобильном список идёт перед картой, карта не занимает весь экран;</li>
+      <li>Карточки преимуществ и шаги выровнены, текст нигде не обрезан;</li>
+      <li>Переключатель тёмной/светлой темы, контрасты доведены до читаемых;</li>
+      <li>Каждый партнёр кликабелен: телефон и «Построить маршрут» в Яндекс.Картах.</li>
     </ul>
   </details>
 </div>
@@ -328,31 +339,37 @@ img.partner-logo { object-fit: contain; padding: 4px; background: #FFFFFF; }
   <section class="hero container">
     <nav class="breadcrumbs"><a href="#">Главная</a> / Партнёры</nav>
     <h1>Сеть партнёров Академии BMW</h1>
-    <p>33 технических центра в Москве и Московской области прошли проверку Академии. Найдите ближайший на карте или в списке.</p>
+    <p>Сотрудничаем с ведущими техническими центрами и тюнинг-ателье Москвы и Московской области, чтобы предоставлять вам лучший сервис. 33 технических центра прошли проверку Академии — выберите ближайший.</p>
     <div class="hero-actions">
       <a class="btn btn-light" href="#cta">Стать партнёром</a>
+      <a class="btn btn-outline" href="#list">Смотреть список партнёров</a>
     </div>
-  </section>
 
-  <div class="toolbar">
-    <div class="container toolbar-inner">
+    <div class="filters" id="list">
       <input type="search" class="search-input" id="searchInput" placeholder="Поиск по названию или адресу…" aria-label="Поиск партнёра">
       <button class="chip active" data-filter="all">Все (33)</button>
       <button class="chip" data-filter="msc">Москва</button>
-      <button class="chip" data-filter="mo">Область</button>
-      <button class="geo-btn" id="geoBtn">📍 Рядом со мной</button>
+      <button class="chip" data-filter="mo">Московская область</button>
     </div>
-  </div>
+  </section>
 
-  <section class="locator" id="locator">
-<div class="pane-list" id="paneList">
-      <button class="sheet-handle" id="sheetHandle" aria-label="Развернуть список"></button>
-      <div class="sheet-hint">Потяните, чтобы развернуть список</div>
-      <p class="list-meta" id="listMeta"></p>
-      <div class="partner-list" id="partnerList"></div>
+  <section class="map-section container">
+    <div class="view-tabs" role="tablist">
+      <button class="active" data-view="list" role="tab">Список</button>
+      <button data-view="map" role="tab">Карта</button>
     </div>
-  
-    <div class="pane-map"><div id="map"></div></div>
+    <div class="map-grid">
+      <div>
+        <p class="list-meta" id="listMeta"></p>
+        <div class="partner-list" id="partnerList"></div>
+      </div>
+      <div class="map-wrap">
+        <iframe id="mapFrame"
+          title="Карта партнёров Академии BMW"
+          loading="lazy"
+          src="https://yandex.ru/map-widget/v1/?ll=37.620%2C55.720&z=9&pt=37.628487,55.684802,pm2ywm1~37.64533,55.705062,pm2ywm2~37.686015,55.781119,pm2ywm3~37.38711,55.709155,pm2ywm4~37.578046,55.859595,pm2ywm5~37.434109,55.626965,pm2ywm6~37.604924,55.568517,pm2ywm7~37.655787,55.789492,pm2ywm8~37.707269,55.72344,pm2ywm9~37.678191,55.896872,pm2ywm10~37.717231,55.73701,pm2ywm11~37.539536,55.909448,pm2ywm12~37.474066,55.628596,pm2ywm13~37.638503,55.705929,pm2ywm14~37.573294,55.815246,pm2ywm15~37.715776,55.73551,pm2ywm16~37.91027,55.753022,pm2ywm17~37.753101,55.734663,pm2ywm18~37.88156,55.745134,pm2ywm19~37.641108,55.703352,pm2ywm20~37.38711,55.709155,pm2ywm21~37.327713,55.812524,pm2ywm22~37.749768,55.749096,pm2ywm23~37.59436,55.875834,pm2ywm24~37.621803,55.615898,pm2ywm25~37.607799,55.582141,pm2ywm26~37.356756,55.791035,pm2ywm27~37.388915,55.793348,pm2ywm28~37.550199,55.733193,pm2ywm29~37.751888,55.797154,pm2ywm30~37.374102,55.725934,pm2ywm31~37.643444,55.632149,pm2ywm32~37.751709,55.93721,pm2ywm33"></iframe>
+      </div>
+    </div>
   </section>
 
   <section class="section container">
@@ -926,72 +943,28 @@ const PARTNERS = [
 ];
 
 const list = document.getElementById('partnerList');
-const listMeta = document.getElementById('listMeta');
 const searchInput = document.getElementById('searchInput');
 const chips = document.querySelectorAll('.chip');
-const locator = document.getElementById('locator');
 let activeFilter = 'all';
+
+const listMeta = document.getElementById('listMeta');
+const mapFrame = document.getElementById('mapFrame');
+const MAP_BASE = 'https://yandex.ru/map-widget/v1/';
+const MAP_ALL = mapFrame.src;
 let openId = null;
-let selectedId = null;
-let userPos = null;
-
-// ---------- Статус «Открыто/Закрыто» ----------
-const DAYS = { 'пн': 1, 'вт': 2, 'ср': 3, 'чт': 4, 'пт': 5, 'сб': 6, 'вс': 7 };
-function workStatus(wt) {
-  if (!wt) return null;
-  const now = new Date();
-  const day = now.getDay() === 0 ? 7 : now.getDay();
-  const segs = wt.split(/<br>|;|\n/).map(s => s.trim()).filter(Boolean);
-  for (const seg of segs) {
-    const m = seg.match(/^([А-Яа-яё]+)(?:-([А-Яа-яё]+))?:\s*(.+)$/);
-    if (!m) continue;
-    const d1 = DAYS[m[1].toLowerCase().slice(0, 2)];
-    const d2 = m[2] ? DAYS[m[2].toLowerCase().slice(0, 2)] : d1;
-    if (d1 == null || d2 == null) continue;
-    const days = [];
-    for (let d = d1; ; d = d % 7 + 1) { days.push(d); if (d === d2) break; }
-    if (!days.includes(day)) continue;
-    const rest = m[3];
-    if (/выходн/i.test(rest)) return { open: false, text: 'Сегодня выходной' };
-    const tm = rest.match(/(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/);
-    if (!tm) return null;
-    const openM = +tm[1] * 60 + +tm[2], closeM = +tm[3] * 60 + +tm[4];
-    const nowM = now.getHours() * 60 + now.getMinutes();
-    if (nowM >= openM && nowM < closeM) return { open: true, text: `Открыто до ${tm[3]}:${tm[4]}` };
-    if (nowM < openM) return { open: false, text: `Откроется в ${tm[1]}:${tm[2]}` };
-    return { open: false, text: 'Сейчас закрыто' };
-  }
-  return null;
-}
-
-// ---------- Расстояние ----------
-function distKm(a, b) {
-  const R = 6371, rad = Math.PI / 180;
-  const dLat = (b.lat - a.lat) * rad, dLon = (b.lon - a.lon) * rad;
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLon / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(h));
-}
-function fmtDist(km) { return km < 1 ? `${Math.round(km * 1000)} м` : `${km.toFixed(1).replace('.', ',')} км`; }
 
 function initial(name) { return name.replace(/[^A-Za-zА-Яа-я0-9]/g, '').slice(0, 1); }
 
-// ---------- Фильтрация и сортировка ----------
-function currentItems() {
+function render() {
   const q = searchInput.value.trim().toLowerCase();
-  let items = PARTNERS.filter(p => {
+  const items = PARTNERS.filter(p => {
     const matchesFilter = activeFilter === 'all' || (activeFilter === 'mo' ? p.mo : !p.mo);
     const matchesSearch = !q || p.name.toLowerCase().includes(q) || p.address.toLowerCase().includes(q);
     return matchesFilter && matchesSearch;
   });
-  if (userPos) items = [...items].sort((a, b) => distKm(userPos, a) - distKm(userPos, b));
-  return items;
-}
 
-// ---------- Рендер списка ----------
-function render() {
-  const items = currentItems();
   listMeta.innerHTML = items.length
-    ? `Найдено: <b>${items.length}</b> из ${PARTNERS.length}${userPos ? ' · сортировка по расстоянию' : ''}`
+    ? `Найдено: <b>${items.length}</b> из ${PARTNERS.length}`
     : 'Ничего не найдено.<button class="reset-link" id="resetFilters">Сбросить фильтры</button>';
   const reset = document.getElementById('resetFilters');
   if (reset) reset.addEventListener('click', () => {
@@ -1000,22 +973,16 @@ function render() {
     render();
   });
 
-  list.innerHTML = items.map((p, i) => {
-    const st = workStatus(p.workingTime);
-    const d = userPos ? distKm(userPos, p) : null;
-    return `
-    <article class="partner-card${p.id === openId ? ' open' : ''}${p.id === selectedId ? ' active' : ''}" data-id="${p.id}">
+  list.innerHTML = items.map(p => `
+    <article class="partner-card${p.id === openId ? ' open' : ''}" data-id="${p.id}">
       <button class="partner-summary" aria-expanded="${p.id === openId}">
-        <span class="partner-num">${i + 1}</span>
         ${p.logo
           ? `<img class="partner-logo" src="${p.logo}" alt="Логотип ${p.name}" loading="lazy" onerror="this.outerHTML='<div class=partner-logo>${initial(p.name)}</div>'">`
           : `<div class="partner-logo">${initial(p.name)}</div>`}
         <span class="partner-oneline">
           <span class="partner-name">${p.name}</span>
           <span class="partner-addr1">${p.address}</span>
-          ${st ? `<span class="partner-status ${st.open ? 'open' : 'closed'}">${st.text}</span>` : ''}
         </span>
-        ${d !== null ? `<span class="partner-dist">${fmtDist(d)}</span>` : ''}
         <span class="chevron">▼</span>
       </button>
       <div class="partner-details">
@@ -1026,73 +993,44 @@ function render() {
           <a href="${p.phoneHref}">${p.phone}</a>
           <a href="${p.route}" target="_blank" rel="noopener">Построить маршрут</a>
         </div>
+        <button class="show-on-map" data-lon="${p.lon}" data-lat="${p.lat}">Показать на карте</button>
       </div>
-    </article>`;
-  }).join('');
-  renderMarkers(items);
+    </article>`).join('');
 }
 
-// ---------- Карта (Leaflet) ----------
-let map = null, markersLayer = null, tileLayer = null, userMarker = null;
-const TILES = {
-  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-  light: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-};
-const ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
-
-function pinIcon(num, active) {
-  return L.divIcon({ className: '', html: `<div class="pin${active ? ' active' : ''}">${num}</div>`, iconSize: [30, 30], iconAnchor: [15, 15] });
-}
-function renderMarkers(items) {
-  if (!map) return;
-  markersLayer.clearLayers();
-  items.forEach((p, i) => {
-    const mk = L.marker([p.lat, p.lon], { icon: pinIcon(i + 1, p.id === selectedId), title: p.name });
-    mk.on('click', () => selectPartner(p.id, true));
-    mk.partnerId = p.id;
-    markersLayer.addLayer(mk);
-  });
-  if (userPos) {
-    if (userMarker) userMarker.remove();
-    userMarker = L.marker([userPos.lat, userPos.lon], {
-      icon: L.divIcon({ className: '', html: '<div class="user-dot"></div>', iconSize: [16, 16], iconAnchor: [8, 8] }),
-      zIndexOffset: 1000,
-    }).addTo(map);
-  }
-}
-function setTile(theme) {
-  if (!map) return;
-  if (tileLayer) tileLayer.remove();
-  tileLayer = L.tileLayer(TILES[theme], { attribution: ATTR, maxZoom: 19 }).addTo(map);
-}
-function initMap() {
-  map = L.map('map', { zoomControl: true, scrollWheelZoom: true }).setView([55.72, 37.6], 10);
-  markersLayer = L.layerGroup().addTo(map);
-  setTile(document.documentElement.dataset.theme);
-  render();
-}
-
-// ---------- Синхронизация список ↔ карта ----------
-function selectPartner(id, fromMap) {
-  selectedId = id;
-  const p = PARTNERS.find(x => x.id === id);
-  openId = id;
-  render();
-  if (map && p) map.flyTo([p.lat, p.lon], Math.max(map.getZoom(), 13), { duration: 0.5 });
-  if (!fromMap) {
-    const card = list.querySelector(`[data-id="${id}"]`);
-    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-  // на мобильном при клике по пину — показать карточку в шторке (полураскрыть)
-  if (fromMap && window.innerWidth <= 900) locator.className = 'locator';
-}
-
+// аккордеон + «Показать на карте»
 list.addEventListener('click', e => {
+  const mapBtn = e.target.closest('.show-on-map');
+  if (mapBtn) {
+    const { lon, lat } = mapBtn.dataset;
+    mapFrame.src = `${MAP_BASE}?ll=${lon}%2C${lat}&z=16&pt=${lon},${lat},pm2rdl`;
+    document.body.dataset.view = 'map';
+    document.querySelectorAll('.view-tabs button').forEach(b =>
+      b.classList.toggle('active', b.dataset.view === 'map'));
+    mapFrame.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
   const summary = e.target.closest('.partner-summary');
-  if (summary) selectPartner(+summary.closest('.partner-card').dataset.id, false);
+  if (summary) {
+    const card = summary.closest('.partner-card');
+    const id = +card.dataset.id;
+    openId = openId === id ? null : id;
+    document.querySelectorAll('.partner-card').forEach(c => {
+      const isOpen = +c.dataset.id === openId;
+      c.classList.toggle('open', isOpen);
+      c.querySelector('.partner-summary').setAttribute('aria-expanded', isOpen);
+    });
+  }
 });
 
-// ---------- Фильтры ----------
+// вкладки Список/Карта (мобильные)
+document.querySelectorAll('.view-tabs button').forEach(btn =>
+  btn.addEventListener('click', () => {
+    document.body.dataset.view = btn.dataset.view;
+    document.querySelectorAll('.view-tabs button').forEach(b => b.classList.toggle('active', b === btn));
+    if (btn.dataset.view === 'list') mapFrame.src = MAP_ALL;
+  }));
+
 searchInput.addEventListener('input', render);
 chips.forEach(chip => chip.addEventListener('click', () => {
   chips.forEach(c => c.classList.remove('active'));
@@ -1100,52 +1038,20 @@ chips.forEach(chip => chip.addEventListener('click', () => {
   activeFilter = chip.dataset.filter;
   render();
 }));
+render();
 
-// ---------- Геолокация ----------
-const geoBtn = document.getElementById('geoBtn');
-geoBtn.addEventListener('click', () => {
-  if (!navigator.geolocation) { geoBtn.textContent = 'Геолокация недоступна'; return; }
-  geoBtn.textContent = 'Определяем…';
-  navigator.geolocation.getCurrentPosition(pos => {
-    userPos = { lat: pos.coords.latitude, lon: pos.coords.longitude };
-    geoBtn.textContent = '📍 Рядом со мной';
-    geoBtn.classList.add('active');
-    render();
-    if (map) map.flyTo([userPos.lat, userPos.lon], 11, { duration: 0.6 });
-  }, () => { geoBtn.textContent = 'Не удалось определить'; });
-});
-
-// ---------- Мобильная шторка ----------
-const paneList = document.getElementById('paneList');
-document.getElementById('sheetHandle').addEventListener('click', () => {
-  locator.className = locator.className === 'locator' ? 'locator sheet-full'
-    : locator.className === 'locator sheet-full' ? 'locator sheet-peek' : 'locator';
-});
-// свайп ручки
-let touchY = null;
-paneList.addEventListener('touchstart', e => { if (e.target.closest('.sheet-handle, .sheet-hint')) touchY = e.touches[0].clientY; }, { passive: true });
-paneList.addEventListener('touchend', e => {
-  if (touchY === null) return;
-  const dy = e.changedTouches[0].clientY - touchY; touchY = null;
-  if (Math.abs(dy) < 30) return;
-  if (dy < 0) locator.className = locator.className === 'locator sheet-peek' ? 'locator' : 'locator sheet-full';
-  else locator.className = locator.className === 'locator sheet-full' ? 'locator' : 'locator sheet-peek';
-}, { passive: true });
-
-// ---------- Тема ----------
+// Переключение темы
 const toggle = document.getElementById('themeToggle');
 const root = document.documentElement;
 function applyTheme(t) {
   root.dataset.theme = t;
   toggle.textContent = t === 'dark' ? '☀' : '🌙';
-  setTile(t);
 }
-toggle.addEventListener('click', () => applyTheme(root.dataset.theme === 'dark' ? 'light' : 'dark'));
+toggle.addEventListener('click', () => {
+  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+});
 applyTheme(root.dataset.theme);
-
-// ---------- Старт ----------
-if (window.L) initMap();
-else window.addEventListener('load', initMap);
 </script>
 </body>
 </html>
