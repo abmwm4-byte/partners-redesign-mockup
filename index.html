@@ -10,8 +10,9 @@
 <meta property="og:title" content="Партнёры Академии BMW — проверенные техцентры и тюнинг-ателье">
 <meta property="og:description" content="Карта проверенных сервисов BMW в Москве и области. Найдите ближайший техцентр или станьте партнёром Академии.">
 <meta property="og:url" content="https://germsp.ru/partners">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -226,6 +227,57 @@ img.partner-logo { object-fit: contain; padding: 4px; background: #FFFFFF; }
 .pin.active { background: #1C1C1C; color: var(--accent); border-color: var(--accent); transform: scale(1.25); }
 .user-dot { width: 16px; height: 16px; border-radius: 50%; background: #377AC8; border: 3px solid #fff; box-shadow: 0 0 0 4px rgba(55,122,200,.3); }
 
+
+/* ===== Кластеры ===== */
+.cluster-pin {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--accent); color: #1C1C1C; border: 2px solid #1C1C1C;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.45);
+}
+
+/* ===== Кнопка «Искать в этой области» (паттерн Airbnb) ===== */
+.map-search-area {
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+  z-index: 1010; display: none; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: 999px; border: none; cursor: pointer;
+  background: var(--accent); color: var(--accent-text);
+  font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0,0,0,.4); white-space: nowrap;
+}
+.map-search-area.show { display: inline-flex; }
+.map-search-area:hover { filter: brightness(1.06); }
+
+/* ===== Попап партнёра (Leaflet popup, паттерн Google Maps) ===== */
+.partner-popup .leaflet-popup-content-wrapper {
+  background: var(--card); color: var(--text);
+  border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: 0 14px 40px rgba(0,0,0,.5);
+}
+.partner-popup .leaflet-popup-content { margin: 14px 16px; font-family: 'Roboto', sans-serif; line-height: 1.45; width: 260px !important; }
+.partner-popup .leaflet-popup-tip { background: var(--card); border: 1px solid var(--border); }
+.partner-popup .leaflet-popup-close-button { color: var(--text-3); font-size: 18px; padding: 6px 8px 0 0; }
+.partner-popup .leaflet-popup-close-button:hover { color: var(--text); }
+.pv-head { display: flex; align-items: center; gap: 12px; }
+.pv-head .partner-logo { width: 44px; height: 44px; flex-basis: 44px; }
+.pv-name { font-family: 'Oswald', sans-serif; font-size: 17px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.pv-status { font-size: 13px; font-weight: 500; }
+.pv-status.open { color: #4ade80; }
+.pv-status.closed { color: #f87171; }
+.pv-addr { margin-top: 8px; font-size: 13px; color: var(--text-2); }
+.pv-dist { margin-top: 2px; font-size: 12px; color: var(--text-3); }
+.pv-actions { display: flex; gap: 8px; margin-top: 12px; }
+.mini-btn {
+  flex: 1; padding: 10px 8px; border-radius: var(--radius); font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px; text-decoration: none; text-align: center;
+  cursor: pointer; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text);
+  font-family: 'Roboto', sans-serif;
+}
+.mini-btn:hover { border-color: var(--accent); }
+.mini-btn.primary { background: #FFFFFF; color: #1C1C1C; border-color: #FFFFFF; }
+.mini-btn.primary:hover { filter: brightness(1.08); }
+
 /* ===== Мобильная шторка ===== */
 .sheet-handle { display: none; }
 @media (max-width: 900px) {
@@ -296,7 +348,8 @@ img.partner-logo { object-fit: contain; padding: 4px; background: #FFFFFF; }
       <a href="accordion.html"><b>вариант B — список-аккордеон</b></a> ·
       <a href="map-first.html"><b>вариант C — карта во главе</b></a>.</p>
     <ul>
-      <li>Интерактивная карта: клик по метке подсвечивает карточку, клик по карточке — метку; номера меток совпадают со списком (паттерн дилерских локаторов);</li>
+      <li>Интерактивная карта: кластеры со счётчиками, клик по метке открывает попап с действиями «Позвонить / Маршрут / Ещё» (паттерн Google Maps), клик по карточке подсвечивает метку;</li>
+      <li>«Искать в этой области» — список обновляется при перемещении карты (паттерн Airbnb);</li>
       <li>Сплит-вью на весь экран: список и карта видны одновременно, без лишнего скролла;</li>
       <li>Мобильная шторка снизу (как в Яндекс.Картах и 2ГИС): карта видна всегда, список выдвигается;</li>
       <li>Статус «Открыто до 21:00» / «Закрыто» из реальных часов работы;</li>
@@ -348,11 +401,14 @@ img.partner-logo { object-fit: contain; padding: 4px; background: #FFFFFF; }
 <div class="pane-list" id="paneList">
       <button class="sheet-handle" id="sheetHandle" aria-label="Развернуть список"></button>
       <div class="sheet-hint">Потяните, чтобы развернуть список</div>
-      <p class="list-meta" id="listMeta"></p>
+      <p class="list-meta" id="listMeta" aria-live="polite"></p>
       <div class="partner-list" id="partnerList"></div>
     </div>
   
-    <div class="pane-map"><div id="map"></div></div>
+    <div class="pane-map">
+      <div id="map"></div>
+      <button class="map-search-area" id="searchAreaBtn">Искать в этой области</button>
+    </div>
   </section>
 
   <section class="section container">
@@ -983,6 +1039,7 @@ function currentItems() {
     const matchesSearch = !q || p.name.toLowerCase().includes(q) || p.address.toLowerCase().includes(q);
     return matchesFilter && matchesSearch;
   });
+  if (boundsFilter) items = items.filter(p => boundsFilter.contains([p.lat, p.lon]));
   if (userPos) items = [...items].sort((a, b) => distKm(userPos, a) - distKm(userPos, b));
   return items;
 }
@@ -992,7 +1049,10 @@ function render() {
   const items = currentItems();
   listMeta.innerHTML = items.length
     ? `Найдено: <b>${items.length}</b> из ${PARTNERS.length}${userPos ? ' · сортировка по расстоянию' : ''}`
+      + (boundsFilter ? '<button class="reset-link" id="resetBounds">Вся карта</button>' : '')
     : 'Ничего не найдено.<button class="reset-link" id="resetFilters">Сбросить фильтры</button>';
+  const resetB = document.getElementById('resetBounds');
+  if (resetB) resetB.addEventListener('click', () => { boundsFilter = null; render(); });
   const reset = document.getElementById('resetFilters');
   if (reset) reset.addEventListener('click', () => {
     searchInput.value = ''; activeFilter = 'all';
@@ -1033,7 +1093,8 @@ function render() {
 }
 
 // ---------- Карта (Leaflet) ----------
-let map = null, markersLayer = null, tileLayer = null, userMarker = null;
+let map = null, markersLayer = null, tileLayer = null, userMarker = null, allMarkers = [];
+let boundsFilter = null, programmaticMove = false;
 const TILES = {
   dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
   light: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
@@ -1046,10 +1107,13 @@ function pinIcon(num, active) {
 function renderMarkers(items) {
   if (!map) return;
   markersLayer.clearLayers();
+  allMarkers = [];
   items.forEach((p, i) => {
     const mk = L.marker([p.lat, p.lon], { icon: pinIcon(i + 1, p.id === selectedId), title: p.name });
-    mk.on('click', () => selectPartner(p.id, true));
+    mk.bindPopup(() => popupHtml(p), { className: 'partner-popup', maxWidth: 300, autoPanPadding: L.point(50, 90) });
+    mk.on('click', () => { selectedId = p.id; highlightListCard(p.id); });
     mk.partnerId = p.id;
+    allMarkers.push(mk);
     markersLayer.addLayer(mk);
   });
   if (userPos) {
@@ -1066,25 +1130,53 @@ function setTile(theme) {
   tileLayer = L.tileLayer(TILES[theme], { attribution: ATTR, maxZoom: 19 }).addTo(map);
 }
 function initMap() {
-  map = L.map('map', { zoomControl: true, scrollWheelZoom: true }).setView([55.72, 37.6], 10);
-  markersLayer = L.layerGroup().addTo(map);
+  map = L.map('map', { zoomControl: true, scrollWheelZoom: true, maxZoom: 19 }).setView([55.72, 37.6], 10);
+  markersLayer = L.markerClusterGroup({
+    showCoverageOnHover: false,
+    maxClusterRadius: 46,
+    iconCreateFunction: c => L.divIcon({
+      className: '',
+      html: `<div class="cluster-pin">${c.getChildCount()}</div>`,
+      iconSize: [40, 40], iconAnchor: [20, 20],
+    }),
+  }).addTo(map);
+  map.on('moveend', () => {
+    if (programmaticMove) { programmaticMove = false; return; }
+    if (!boundsFilter) document.getElementById('searchAreaBtn').classList.add('show');
+  });
   setTile(document.documentElement.dataset.theme);
   render();
 }
 
 // ---------- Синхронизация список ↔ карта ----------
+function highlightListCard(id) {
+  openId = id; selectedId = id;
+  document.querySelectorAll('.partner-card').forEach(c => {
+    const isTarget = +c.dataset.id === id;
+    c.classList.toggle('open', isTarget);
+    c.classList.toggle('active', isTarget);
+    c.querySelector('.partner-summary').setAttribute('aria-expanded', isTarget);
+  });
+  const card = list.querySelector(`[data-id="${id}"]`);
+  if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
 function selectPartner(id, fromMap) {
-  selectedId = id;
+  highlightListCard(id);
+  if (!map || fromMap) return;
   const p = PARTNERS.find(x => x.id === id);
-  openId = id;
-  render();
-  if (map && p) map.flyTo([p.lat, p.lon], Math.max(map.getZoom(), 13), { duration: 0.5 });
-  if (!fromMap) {
-    const card = list.querySelector(`[data-id="${id}"]`);
-    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (!p) return;
+  if (window.innerWidth > 900) {
+    programmaticMove = true;
+    map.flyTo([p.lat, p.lon], Math.max(map.getZoom(), 14), { duration: 0.5 });
+    map.once('moveend', () => {
+      const mk = allMarkers.find(l => l.partnerId === id);
+      if (mk) {
+        programmaticMove = true;
+        markersLayer.zoomToShowLayer(mk, () => mk.openPopup());
+      }
+    });
   }
-  // на мобильном при клике по пину — показать карточку в шторке (полураскрыть)
-  if (fromMap && window.innerWidth <= 900) locator.className = 'locator';
 }
 
 list.addEventListener('click', e => {
@@ -1092,12 +1184,55 @@ list.addEventListener('click', e => {
   if (summary) selectPartner(+summary.closest('.partner-card').dataset.id, false);
 });
 
+// ---------- Попап партнёра (Leaflet popup) ----------
+function popupHtml(p) {
+  const st = workStatus(p.workingTime);
+  const d = userPos ? distKm(userPos, p) : null;
+  return `
+    <div class="pv-head">
+      ${p.logo
+        ? `<img class="partner-logo" src="${p.logo}" alt="" loading="lazy" onerror="this.outerHTML='<div class=partner-logo>${initial(p.name)}</div>'">`
+        : `<div class="partner-logo">${initial(p.name)}</div>`}
+      <div>
+        <div class="pv-name">${p.name}</div>
+        ${st ? `<div class="pv-status ${st.open ? 'open' : 'closed'}">${st.text}</div>` : ''}
+      </div>
+    </div>
+    <div class="pv-addr">${p.address}</div>
+    ${d !== null ? `<div class="pv-dist">${fmtDist(d)} от вас</div>` : ''}
+    <div class="pv-actions">
+      <a class="mini-btn" href="${p.phoneHref}">Позвонить</a>
+      <a class="mini-btn primary" href="${p.route}" target="_blank" rel="noopener">Маршрут</a>
+      <button class="mini-btn" data-more="${p.id}">Ещё</button>
+    </div>`;
+}
+// «Ещё» в попапе → полная карточка в списке
+document.addEventListener('click', e => {
+  const more = e.target.closest('[data-more]');
+  if (!more) return;
+  const id = +more.dataset.more;
+  if (map) map.closePopup();
+  highlightListCard(id);
+  locator.className = 'locator sheet-full';
+  const card = list.querySelector(`[data-id="${id}"]`);
+  if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+// ---------- «Искать в этой области» (паттерн Airbnb) ----------
+const searchAreaBtn = document.getElementById('searchAreaBtn');
+searchAreaBtn.addEventListener('click', () => {
+  boundsFilter = map.getBounds();
+  searchAreaBtn.classList.remove('show');
+  render();
+});
+
 // ---------- Фильтры ----------
-searchInput.addEventListener('input', render);
+searchInput.addEventListener('input', () => { boundsFilter = null; render(); });
 chips.forEach(chip => chip.addEventListener('click', () => {
   chips.forEach(c => c.classList.remove('active'));
   chip.classList.add('active');
   activeFilter = chip.dataset.filter;
+  boundsFilter = null;
   render();
 }));
 
