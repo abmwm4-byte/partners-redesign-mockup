@@ -296,15 +296,23 @@ img.partner-logo { object-fit: contain; padding: 4px; background: #FFFFFF; }
 /* ===== Футер ===== */
 .footer { border-top: 1px solid var(--border); padding: 32px 0; color: var(--text-3); font-size: 13px; background: var(--bg-soft); }
 .footer-inner { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; }
+
+/* ===== Вариант B: карта во главе ===== */
+.layout-map-first .map-grid { grid-template-columns: 1fr; }
+.layout-map-first .map-wrap { position: relative; top: 0; order: -1; margin-top: 20px; }
+.layout-map-first .map-wrap iframe { height: 60vh; }
+.layout-map-first .partner-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; }
+@media (max-width: 1100px) { .layout-map-first .partner-list { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 900px) { .layout-map-first .partner-list { grid-template-columns: 1fr; } }
 </style>
 </head>
-<body>
+<body class="layout-map-first" data-view="map">
 
 <!-- Плашка для презентации макета — на проде удалить -->
 <div class="mock-note">
   <details>
     <summary>Это макет редизайна страницы /partners — что здесь исправлено</summary>
-    <p style="margin-top:8px">Вариант A — список-аккордеон (эта страница). Вариант B — <a href="map-first.html" style="color:inherit;text-decoration:underline"><b>карта во главе страницы</b></a>.</p>
+    <p style="margin-top:8px">Вариант A — <a href="index.html" style="color:inherit;text-decoration:underline"><b>список-аккордеон</b></a>. Вариант B — карта во главе (эта страница).</p>
     <ul>
       <li>Уникальные title, description, canonical, Open Graph и JSON-LD (ItemList партнёров) — сейчас страница отдаёт пустой HTML с мета главной;</li>
       <li>Заголовок не капсом в разметке и не обрезается на мобильных;</li>
@@ -355,8 +363,8 @@ img.partner-logo { object-fit: contain; padding: 4px; background: #FFFFFF; }
 
   <section class="map-section container">
     <div class="view-tabs" role="tablist">
-      <button class="active" data-view="list" role="tab">Список</button>
-      <button data-view="map" role="tab">Карта</button>
+      <button data-view="list" role="tab">Список</button>
+      <button class="active" data-view="map" role="tab">Карта</button>
     </div>
     <div class="map-grid">
       <div>
