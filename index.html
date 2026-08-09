@@ -81,6 +81,8 @@ img { max-width: 100%; }
 h1, h2, h3, .btn, .partner-name, .chip, .phone { font-family: 'Oswald', 'Arial Narrow', sans-serif; }
 .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
+main { display: flex; flex-direction: column; }
+
 /* ===== Шапка ===== */
 .header { position: sticky; top: 0; z-index: 60; background: var(--bg-soft); border-bottom: 1px solid var(--border); }
 .header-inner { display: flex; align-items: center; gap: 24px; height: 64px; }
@@ -278,18 +280,42 @@ img.partner-logo { object-fit: contain; padding: 4px; background: #FFFFFF; }
 .mini-btn.primary { background: #FFFFFF; color: #1C1C1C; border-color: #FFFFFF; }
 .mini-btn.primary:hover { filter: brightness(1.08); }
 
-/* ===== Мобильная шторка ===== */
+/* ===== Мобильная раскладка: карта первым экраном ===== */
 .sheet-handle { display: none; }
 @media (max-width: 900px) {
-  .locator { display: block; height: calc(100dvh - 64px - 57px); }
+  /* порядок: локатор сразу под шапкой → hero → остальные секции */
+  .mock-note { display: none; } /* на телефоне не тратим экран */
+  .locator { order: 1; }
+  .hero { order: 2; }
+  .section { order: 3; }
+  .toolbar { transition: opacity .2s; }
+  .toolbar.tb-hidden { opacity: 0; visibility: hidden; }
+
+  /* тулбар плавает поверх карты (паттерн Google Maps) */
+  .toolbar {
+    position: fixed; top: 64px; left: 0; right: 0; z-index: 1015;
+    background: transparent; border-bottom: none; padding: 8px 0 0;
+    pointer-events: none;
+  }
+  .toolbar-inner { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 6px; scrollbar-width: none; }
+  .toolbar-inner::-webkit-scrollbar { display: none; }
+  .toolbar-inner > * { pointer-events: auto; flex: 0 0 auto; }
+  .toolbar-inner .search-input { flex: 0 0 190px; box-shadow: 0 4px 16px rgba(0,0,0,.35); }
+  .toolbar-inner .chip, .toolbar-inner .geo-btn { box-shadow: 0 4px 16px rgba(0,0,0,.35); }
+
+  /* локатор на весь экран под шапкой */
+  .locator { display: block; height: calc(100dvh - 64px); }
   .pane-map { position: absolute; inset: 0; }
+
+  /* шторка: три положения */
   .pane-list {
-    position: absolute; z-index: 1010; left: 0; right: 0; bottom: 0;
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 1010;
     background: var(--bg); border-top: 1px solid var(--border);
     border-radius: 16px 16px 0 0; box-shadow: 0 -8px 30px rgba(0,0,0,.35);
-    height: 45%; transition: height .25s ease; overflow-y: auto;
+    height: 150px; transition: height .25s ease; overflow-y: auto;
+    overscroll-behavior: contain;
   }
-  .locator.sheet-peek .pane-list { height: 110px; }
+  .locator.sheet-half .pane-list { height: 45%; }
   .locator.sheet-full .pane-list { height: 92%; }
   .sheet-handle {
     display: block; width: 100%; padding: 10px 0 6px; background: none; border: none;
@@ -301,8 +327,11 @@ img.partner-logo { object-fit: contain; padding: 4px; background: #FFFFFF; }
     background: var(--border); margin: 0 auto;
   }
   .sheet-hint { text-align: center; font-size: 12px; color: var(--text-3); padding-bottom: 4px; }
+
+  /* hero компактнее — он теперь под картой */
+  .hero { padding: 32px 0 24px; }
 }
-@media (min-width: 901px) { .sheet-hint { display: none; } }
+@media (min-width: 901px) { .sheet-hint { display: none; } } }
 
 /* ===== Секции ===== */
 .section { padding: 64px 0; }
@@ -1111,7 +1140,16 @@ function renderMarkers(items) {
   items.forEach((p, i) => {
     const mk = L.marker([p.lat, p.lon], { icon: pinIcon(i + 1, p.id === selectedId), title: p.name });
     mk.bindPopup(() => popupHtml(p), { className: 'partner-popup', maxWidth: 300, autoPanPadding: L.point(50, 90) });
-    mk.on('click', () => { selectedId = p.id; highlightListCard(p.id); });
+    mk.on('click', () => {
+      selectedId = p.id;
+      highlightListCard(p.id);
+      if (window.innerWidth <= 900) {
+        map.closePopup();
+        locator.className = 'locator sheet-half';
+        const card = list.querySelector(`[data-id="${p.id}"]`);
+        if (card) paneList.scrollTo({ top: card.offsetTop - 70, behavior: 'smooth' });
+      }
+    });
     mk.partnerId = p.id;
     allMarkers.push(mk);
     markersLayer.addLayer(mk);
@@ -1130,7 +1168,7 @@ function setTile(theme) {
   tileLayer = L.tileLayer(TILES[theme], { attribution: ATTR, maxZoom: 19 }).addTo(map);
 }
 function initMap() {
-  map = L.map('map', { zoomControl: true, scrollWheelZoom: true, maxZoom: 19 }).setView([55.72, 37.6], 10);
+  map = L.map('map', { zoomControl: window.innerWidth > 900, scrollWheelZoom: true, maxZoom: 19 }).setView([55.72, 37.6], 10);
   markersLayer = L.markerClusterGroup({
     showCoverageOnHover: false,
     maxClusterRadius: 46,
@@ -1157,8 +1195,10 @@ function highlightListCard(id) {
     c.classList.toggle('active', isTarget);
     c.querySelector('.partner-summary').setAttribute('aria-expanded', isTarget);
   });
-  const card = list.querySelector(`[data-id="${id}"]`);
-  if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (window.innerWidth > 900) {
+    const card = list.querySelector(`[data-id="${id}"]`);
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 }
 
 function selectPartner(id, fromMap) {
@@ -1213,7 +1253,7 @@ document.addEventListener('click', e => {
   const id = +more.dataset.more;
   if (map) map.closePopup();
   highlightListCard(id);
-  locator.className = 'locator sheet-full';
+  if (window.innerWidth <= 900) locator.className = 'locator sheet-full';
   const card = list.querySelector(`[data-id="${id}"]`);
   if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
@@ -1250,22 +1290,33 @@ geoBtn.addEventListener('click', () => {
   }, () => { geoBtn.textContent = 'Не удалось определить'; });
 });
 
-// ---------- Мобильная шторка ----------
+// ---------- Мобильная шторка: peek → half → full ----------
 const paneList = document.getElementById('paneList');
-document.getElementById('sheetHandle').addEventListener('click', () => {
-  locator.className = locator.className === 'locator' ? 'locator sheet-full'
-    : locator.className === 'locator sheet-full' ? 'locator sheet-peek' : 'locator';
-});
-// свайп ручки
+const SHEET_STATES = ['locator', 'locator sheet-half', 'locator sheet-full']; // '' = peek
+function sheetNext() {
+  const cur = locator.className;
+  locator.className = SHEET_STATES[(SHEET_STATES.indexOf(cur) + 1) % SHEET_STATES.length] || 'locator';
+}
+document.getElementById('sheetHandle').addEventListener('click', sheetNext);
+document.querySelector('.sheet-hint').addEventListener('click', sheetNext);
+// свайп ручки и подсказки
 let touchY = null;
 paneList.addEventListener('touchstart', e => { if (e.target.closest('.sheet-handle, .sheet-hint')) touchY = e.touches[0].clientY; }, { passive: true });
 paneList.addEventListener('touchend', e => {
   if (touchY === null) return;
   const dy = e.changedTouches[0].clientY - touchY; touchY = null;
   if (Math.abs(dy) < 30) return;
-  if (dy < 0) locator.className = locator.className === 'locator sheet-peek' ? 'locator' : 'locator sheet-full';
-  else locator.className = locator.className === 'locator sheet-full' ? 'locator' : 'locator sheet-peek';
+  const cur = SHEET_STATES.indexOf(locator.className);
+  if (dy < 0) locator.className = SHEET_STATES[Math.min(cur + 1, 2)];
+  else locator.className = SHEET_STATES[Math.max(cur - 1, 0)];
 }, { passive: true });
+
+// ---------- Прячем плавающий тулбар за пределами локатора (мобильные) ----------
+if (window.matchMedia('(max-width: 900px)').matches && 'IntersectionObserver' in window) {
+  const tb = document.querySelector('.toolbar');
+  new IntersectionObserver(([e]) => tb.classList.toggle('tb-hidden', !e.isIntersecting),
+    { threshold: 0.05 }).observe(locator);
+}
 
 // ---------- Тема ----------
 const toggle = document.getElementById('themeToggle');
